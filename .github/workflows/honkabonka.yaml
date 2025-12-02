@@ -1,16 +1,22 @@
-name: Star Wars ASCII Warmup
+name: Simple If Demo
 
 on:
   push:
-    branches:
-      - main
-
+  
 jobs:
-  print-r2:
-    runs-on: ubuntu-latest 
+  test-if:
+    runs-on: ubuntu-latest
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
-
-      - name: Run R2 script
-        run: bash r2d2.sh
+    
+      - name: Echo 1
+        run: echo "1"
+        if: 2 == 3
+        # ^ condition that must equate to TRUE in order the step to run
+        
+      - name: Echo 2
+        run: echo "2"
+        if: 2 != 3
+        
+      - name: Echo 3
+        run: echo "3"
+        if: 5 > 10
