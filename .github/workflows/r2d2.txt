@@ -1,0 +1,15 @@
+name: Star Wars ASCII Warmup
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  print-r2:
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Run R2 script
+        run: bash r2-d-2.sh
