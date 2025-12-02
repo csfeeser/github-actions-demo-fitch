@@ -3,7 +3,7 @@ on:
   push:
 
 jobs:
-  show-kitten:
+  its-smurfin-time:
     runs-on: ubuntu-latest
     env:
       smurf_color: "blue"
@@ -14,3 +14,9 @@ jobs:
 
       - name: Display ENV with OS
         run: echo "Smurfs are $smurf_color!"
+        
+      - name: Override the job-level ENV
+        run: echo "Smurfs are $smurf_color!"
+        env:
+          smurf_color: green
+          
