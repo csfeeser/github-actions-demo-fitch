@@ -21,5 +21,5 @@ jobs:
         
       - name: Echo 3
         run: echo "3"
-        if: contains(github.event.head_commit.message, "jabberwocky")
+        if: contains(github.event.head_commit.message, 'jabberwocky')
         # ^ check if the commit message contains a certain string
