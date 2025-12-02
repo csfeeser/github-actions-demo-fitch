@@ -1,48 +1,39 @@
-name: Failure Recovery Demo
+name: Failure and Recovery
 
 on:
   push:
-  workflow_dispatch:  # manual trigger to keep this easy to rerun
-  
+    branches:
+      - main
+
 jobs:
-  main-job:
+  run-and-recover:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Step that always fails
-        id: failing_step
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Intentionally Fail
+        id: failing-step
         run: |
-          echo "This step is going to fail on purpose."
+          echo "This step is going to fail intentionally."
           exit 1
 
-      - if: failure()
-        run: echo "Something got screwed up, boss."
+      - name: Recovery Step
+        if: failure() && steps.failing-step.outcome == 'failure'
+        run: |
+          echo "🚑 A failure was detected. Executing recovery..."
+          # Add your recovery commands here (e.g., cleanup, rollback, notification).
+          echo "Recovery actions completed."
+
+      - name: Recovery Step 2
+        if: steps.failing-step.outcome == 'failure'
+        run: |
+          echo "🚑 A failure was detected. Executing recovery... 2"
+          # Add your recovery commands here (e.g., cleanup, rollback, notification).
+          echo "Recovery 2 actions completed."
           
-      - if: steps.failing_step.outcome == 'failure'
-        run: echo "Imagine cleanup, rollback, or logging happening here."
-
-      - if: always()
-        run: echo "This always runs, even if the job had failures."
-
-      - id: flaky_step
-        continue-on-error: true
+      - name: Post-Recovery Step
+        if: always()
         run: |
-          echo "Simulating a flaky step."
-          echo "Pretending this failed."
-          exit 1
-
-  fix-it-job:
-    runs-on: ubuntu-latest
-    needs:
-      - main-job
-      # this job will NOT run until the main-job runs
-      
-    # this job only runs if ANY previous job failed
-    if: failure()
-
-    steps:
-
-      # redundant condition, but still works
-      - if: ${{ needs.main-job.result == 'failure' }}
-        run: |
-          echo "main-job FAILED. This is where you'd send an alert or roll back."
+          echo "✅ Workflow completed with or without recovery."
