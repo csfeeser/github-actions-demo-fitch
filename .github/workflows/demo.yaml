@@ -1,7 +1,6 @@
 name: Java Compile and Run
 
 on:
-  workflow_dispatch:
   push:
     paths:
       - '**.java'        # only runs if a .java file is pushed
