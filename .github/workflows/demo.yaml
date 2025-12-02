@@ -1,0 +1,47 @@
+name: Failure Recovery Demo
+
+on:
+  workflow_dispatch:  # manual trigger to keep this easy to rerun
+  
+jobs:
+  main-job:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Step that always fails
+        id: failing_step
+        run: |
+          echo "This step is going to fail on purpose."
+          exit 1
+
+      - if: failure()
+        run: echo "Something got screwed up, boss."
+          
+      - if: steps.failing_step.outcome == 'failure'
+        run: echo "Imagine cleanup, rollback, or logging happening here."
+
+      - if: always()
+        run: echo "This always runs, even if the job had failures."
+
+      - id: flaky_step
+        continue-on-error: true
+        run: |
+          echo "Simulating a flaky step."
+          echo "Pretending this failed."
+          exit 1
+
+  fix-it-job:
+    runs-on: ubuntu-latest
+    needs:
+      - main-job
+      # this job will NOT run until the main-job runs
+      
+    # this job only runs if ANY previous job failed
+    if: failure()
+
+    steps:
+
+      # redundant condition, but still works
+      - if: ${{ needs.main-job.result == 'failure' }}
+        run: |
+          echo "main-job FAILED. This is where you'd send an alert or roll back."
