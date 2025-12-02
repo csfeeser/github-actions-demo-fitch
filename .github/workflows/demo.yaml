@@ -1,32 +1,51 @@
-name: Ansible ISS API Query
+name: Java Compile and Run
 
 on:
-  workflow_dispatch:   # manual trigger
+  workflow_dispatch:
   push:
-    branches:
-      - main
+    paths:
+      - '**.java'        # only runs if a .java file is pushed
+  workflow_dispatch:      # manual button press
 
 jobs:
-  run-ansible:
+  build-java:
     runs-on: ubuntu-latest
-    env:
-      ANSIBLE_NOCOWS: '1'    # ansible has global config values that can be set as env vars
 
     steps:
-
+      # abstraction for "git clone"
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install Ansible
-        run: |
-          python -m pip install --upgrade pip     # use the python package installer pip to upgrade pip
-          pip install ansible                     # use the python package installer pip to install ansible
+      # install a specific version of Java (needed to run or compile)
+      - name: Set up Temurin Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
 
-      - name: Run Ansible playbook                # here we actually call ansible and the playbook (ansible code)
-        run: ansible-playbook -i ansible/inventory ansible/iss_query.yml
+      # try to reuse an existing compiled class from a previous run
+      - name: Try to download existing compiled artifact
+        id: get_artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: java-artifact
+        continue-on-error: true   # don't fail the job if artifact doesn't exist
 
-      - name: Upload API response as artifact     # we want to save the results of our ansible playbook
+      # only compile if the artifact download FAILED (meaning no prior artifact)
+      - name: Compile HelloWorld.java
+        if: steps.get_artifact.outcome == 'failure'
+        run: javac HelloWorld.java
+
+      # only upload a new artifact if we had to compile
+      - name: Upload compiled Java artifact
+        if: steps.get_artifact.outcome == 'failure'
         uses: actions/upload-artifact@v4
         with:
-          name: iss-api-response
-          path: /tmp/iss_response.json
+          name: java-artifact
+          path: HelloWorld.class
+
+      # this will run using either:
+      # - the downloaded class file, OR
+      # - the freshly compiled one
+      - name: Run HelloWorld
+        run: java HelloWorld
