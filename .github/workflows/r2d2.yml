@@ -14,4 +14,4 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Run R2 script
-        run: bash r2-d-2.sh
+        run: bash r2d2.sh
