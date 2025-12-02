@@ -1,39 +1,16 @@
-name: Failure and Recovery
-
+name: ENV Demo
 on:
   push:
-    branches:
-      - main
 
 jobs:
-  run-and-recover:
+  show-kitten:
     runs-on: ubuntu-latest
+    env:
+      smurf_color: "blue"
 
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
+      - name: Display ENV with GitHub syntax
+        run: echo "Smurfs are ${{ env.smurf_color }}!"
 
-      - name: Intentionally Fail
-        id: failing-step
-        run: |
-          echo "This step is going to fail intentionally."
-          exit 1
-
-      - name: Recovery Step
-        if: failure() && steps.failing-step.outcome == 'failure'
-        run: |
-          echo "🚑 A failure was detected. Executing recovery..."
-          # Add your recovery commands here (e.g., cleanup, rollback, notification).
-          echo "Recovery actions completed."
-
-      - name: Recovery Step 2
-        if: ${{ steps.failing-step.outcome == 'failure' }}
-        run: |
-          echo "🚑 A failure was detected. Executing recovery... 2"
-          # Add your recovery commands here (e.g., cleanup, rollback, notification).
-          echo "Recovery 2 actions completed."
-          
-      - name: Post-Recovery Step
-        if: always()
-        run: |
-          echo "✅ Workflow completed with or without recovery."
+      - name: Display ENV with OS
+        run: echo "Smurfs are $smurf_color!"
