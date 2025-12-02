@@ -1,6 +1,7 @@
 name: Failure Recovery Demo
 
 on:
+  push:
   workflow_dispatch:  # manual trigger to keep this easy to rerun
   
 jobs:
