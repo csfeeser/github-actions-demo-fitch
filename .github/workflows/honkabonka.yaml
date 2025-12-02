@@ -10,13 +10,11 @@ jobs:
     
       - name: Echo 1
         run: echo "1"
-        if: 2 == 3
-        # ^ condition that must equate to TRUE in order the step to run
+        if: github.actor == 'csfeeser'
+        # ^ this step only runs if the repo owner is Chad Feeser
         
       - name: Echo 2
         run: echo "2"
-        if: 2 != 3
+        if: github.ref == 'refs/heads/main'
+        # ^ this step only runs if the commit is being made to the main branch
         
-      - name: Echo 3
-        run: echo "3"
-        if: 5 > 10
