@@ -27,7 +27,7 @@ jobs:
           echo "Recovery actions completed."
 
       - name: Recovery Step 2
-        if: failure() && steps.failing-step.outcome == 'failure'
+        if: ${{ steps.failing-step.outcome == 'failure' }}
         run: |
           echo "🚑 A failure was detected. Executing recovery... 2"
           # Add your recovery commands here (e.g., cleanup, rollback, notification).
