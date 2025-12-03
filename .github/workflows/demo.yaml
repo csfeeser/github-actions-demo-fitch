@@ -1,42 +1,25 @@
-name: Java Compile and Run
+name: Failure Handling Warmup
 
 on:
   push:
-  workflow_dispatch:      # manual button press
+    branches:
+      - main
 
 jobs:
-  build-java:
+  failure-demo:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Temurin Java 17
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '17'
+      - name: Intentionally fail
+        id: failing-step
+        run: bash fail-or-pass.sh
 
-      # Try to restore compiled class from cache
-      - name: Restore cached HelloWorld.class
-        id: cache-class
-        uses: actions/cache@v4
-        with:
-          path: HelloWorld.class
-          key: helloworld-class-${{ hashFiles('HelloWorld.java') }}
+      - name: Recovery step
+        if: success() && steps.failing-step.outcome == 'failure'
+        run: echo "Hop on the struggle bus, because we're trying to recover from the failure!"
 
-      # Only compile if cache MISS
-      - name: Compile HelloWorld.java
-        if: steps.cache-class.outputs.cache-hit != 'true'
-        run: javac HelloWorld.java
-
-      - name: Run HelloWorld
-        run: java HelloWorld
-
-      # Optional: still upload the class as an artifact for teaching/demo
-      - name: Upload compiled Java artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: java-artifact
-          path: HelloWorld.class
+      - name: Summary step
+        run: echo "Workflow finished (success or failure)."
