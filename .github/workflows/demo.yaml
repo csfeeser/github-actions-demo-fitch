@@ -15,11 +15,13 @@ jobs:
 
       - name: Intentionally fail
         id: failing-step
+        continue-on-error: true          # FIX 1: allow the job to continue after this failure
         run: bash fail-or-pass.sh
 
       - name: Recovery step
-        if: success() && steps.failing-step.outcome == 'failure'
+        if: failure() && steps.failing-step.outcome == 'failure'   # FIX 2: use failure(), not success()
         run: echo "Hop on the struggle bus, because we're trying to recover from the failure!"
 
       - name: Summary step
+        if: always()                         # FIX 3: use always() so this runs no matter what
         run: echo "Workflow finished (success or failure)."
