@@ -38,7 +38,7 @@ jobs:
           cat apod.json
 
           # Extract the HD image URL from the JSON
-          HDURL=$(jq -r '.hdurl' apod.json)
+          HDURL=$(jq -r '.[0].hdurl // .[0].url' apod.json)
           echo "HDURL is: $HDURL"
 
           # Download the image into the images/ folder
