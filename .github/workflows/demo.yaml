@@ -16,8 +16,8 @@ jobs:
             query: "date=2025-12-03"
           - name: "yesterday_apod"
             query: "date=2025-12-02"
-          - name: "random_apod"
-            query: "count=1"
+          - name: "last_year_apod"
+            query: "date=2024-12-03"
 
     steps:
       - name: Checkout repository
