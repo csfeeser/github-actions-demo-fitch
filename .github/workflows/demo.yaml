@@ -1,4 +1,4 @@
-name: Failure Handling Warmup
+name: NASA APOD Matrix Warmup
 
 on:
   push:
@@ -6,22 +6,47 @@ on:
       - main
 
 jobs:
-  failure-demo:
+  fetch-apod:
     runs-on: ubuntu-latest
 
+    strategy:
+      matrix:
+        request:
+          - name: "today_apod"
+            query: "date=2025-12-03"
+          - name: "yesterday_apod"
+            query: "date=2025-12-02"
+          - name: "random_apod"
+            query: "count=1"
+
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Intentionally fail
-        id: failing-step
-        continue-on-error: true          # FIX 1: allow the job to continue after this failure
-        run: bash fail-or-pass.sh
+      - name: Call NASA APOD API
+        run: |
+          # Read the API key from a repository secret
+          API_KEY="${{ secrets.NASA_API_KEY }}"
 
-      - name: Recovery step
-        if: failure() && steps.failing-step.outcome == 'failure'   # FIX 2: use failure(), not success()
-        run: echo "Hop on the struggle bus, because we're trying to recover from the failure!"
+          # Build the APOD URL using the matrix query value
+          URL="https://api.nasa.gov/planetary/apod?${{ matrix.request.query }}&api_key=$API_KEY"
 
-      - name: Summary step
-        if: always()                         # FIX 3: use always() so this runs no matter what
-        run: echo "Workflow finished (success or failure)."
+          echo "Calling: $URL"
+          curl "$URL" -o apod.json
+
+          echo "API response:"
+          cat apod.json
+
+          # Extract the HD image URL from the JSON
+          HDURL=$(jq -r '.hdurl' apod.json)
+          echo "HDURL is: $HDURL"
+
+          # Download the image into the images/ folder
+          mkdir -p images
+          curl "$HDURL" -o "images/${{ matrix.request.name }}.jpg"
+
+      - name: Upload APOD images
+        uses: actions/upload-artifact@v4
+        with:
+          name: apod-images
+          path: images/
